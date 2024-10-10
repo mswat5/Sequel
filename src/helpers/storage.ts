@@ -215,6 +215,8 @@ export const getOrgans = (): OrgansDataType => {
 	} catch (e) {
 		console.log(e);
 		return ORGANS_DATA;
+	}
+};
 
 export const handleStoreInsights =  (content: string, moduleName: string) => {
 	const localData = localStorage.getItem("insights");

@@ -10,6 +10,7 @@ import {
 	storeAssistantId,
 	getFiles,
 	getJournalData,
+	getOrgans,
 } from "src/helpers/storage";
 
 class EventEmitter extends EventTarget {
@@ -114,11 +115,7 @@ async function makeFilesMessages(
 
 		if (filesData && !!filesData.length) {
 			const messageCreationPromises = filesData.map(
-				async (file: {
-          name: string;
-          content: string;
-          createdDate: number;
-        }) => {
+				async (file: { name: string; content: string; createdDate: number }) => {
 					return openai.beta.threads.messages.create(threadId, {
 						role: "user",
 						content: `Here's my ${
@@ -251,9 +248,7 @@ export async function getAnswer(
 
 	const selectedAIConfiguration = getSelectedAIConfiguration();
 	let response: MessageType = { message: "", isSent: false };
-	if (
-		selectedAIConfiguration === "sequelsOpenAI" 
-	) {
+	if (selectedAIConfiguration === "sequelsOpenAI") {
 		const AIKey = getAIKey();
 		if (AIKey !== "") {
 			const openai = new OpenAI({
@@ -267,7 +262,7 @@ export async function getAnswer(
 			try {
 				const parsedContent = JSON.parse(content);
 				if (!parsedContent) {
-					throw new Error('No parsed content');
+					throw new Error("No parsed content");
 				}
 				if (parsedContent.whoop) {
 					await makeWhoopMessages(openai, content, threadId);
@@ -327,7 +322,9 @@ export async function getAnswer(
 		const AIKey = getAIKey();
 		if (AIKey !== "") {
 			const model =
-        selectedAIConfiguration === "groqLlama" ? "llama2-70b-4096" : "mixtral-8x7b-32768";
+				selectedAIConfiguration === "groqLlama"
+					? "llama2-70b-4096"
+					: "mixtral-8x7b-32768";
 			const groq = new Groq({
 				apiKey: AIKey,
 				dangerouslyAllowBrowser: true,
@@ -367,10 +364,7 @@ export async function getAnswer(
 				});
 			let finalMessage = "";
 			for await (const chunk of stream) {
-				ChatEmitter.emit(
-					"updateMessage",
-					chunk.choices[0]?.delta?.content || ""
-				);
+				ChatEmitter.emit("updateMessage", chunk.choices[0]?.delta?.content || "");
 				finalMessage += chunk.choices[0]?.delta?.content || "";
 			}
 			ChatEmitter.emit("finishedMessage");
@@ -387,19 +381,14 @@ export async function removeExistingThread() {
 	storeAssistantId("");
 }
 
-
-
 export async function getOrganHealthAssessment() {
-
-	const API_KEY = process.env.REACT_APP_OPENAI_API_KEY
+	const API_KEY = process.env.REACT_APP_OPENAI_API_KEY;
 
 	if (!API_KEY) {
 		throw new Error("OpenAI API key is required for this feature.");
 	}
 
 	try {
-
-	
 		let files, journal, organs;
 		try {
 			files = getFiles();
@@ -418,7 +407,6 @@ export async function getOrganHealthAssessment() {
 		} catch (e) {
 			console.error(e);
 		}
-
 
 		const prompt = `
 	
@@ -495,49 +483,46 @@ Remoember to return a JSON with all the organs & their status & reason filled it
 If you believe that there is limited data to gather about for an organ, you can return "Unsure" for that organ; however, this should be very unlikely & it almost impossible that there is no indication of the status & reason for an organ.
 You have to infer the status & reason for an organ, it will obviously never be explicity mentioned. You have to infer it.
 Return the filled in object below:
-`
-
+`;
 
 		const response = await fetch("https://api.openai.com/v1/chat/completions", {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",
-				"Authorization": `Bearer ${API_KEY}`,
+				Authorization: `Bearer ${API_KEY}`,
 			},
 			body: JSON.stringify({
-				model: "gpt-4-turbo-preview", 
+				model: "gpt-4-turbo-preview",
 				messages: [
 					{
 						role: "user",
-						content: prompt
-					}
+						content: prompt,
+					},
 				],
 				response_format: {
-					type: "json_object"
-				}
+					type: "json_object",
+				},
 			}),
 		});
- 
+
 		const data = await response.json();
 		const json = data.choices[0].message.content;
 		const jsonObject = JSON.parse(json);
 
 		return jsonObject;
-
 	} catch (err) {
 		console.log(err);
 		return [];
 	}
-}	
-
+}
 
 export async function getInsightsData(moduleName: string, newData: any) {
 	try {
-		const API_KEY = process.env.REACT_APP_OPENAI_API_KEY
+		const API_KEY = process.env.REACT_APP_OPENAI_API_KEY;
 
-	if (!API_KEY) {
-		throw new Error("OpenAI API key is required for this feature.");
-	}
+		if (!API_KEY) {
+			throw new Error("OpenAI API key is required for this feature.");
+		}
 
 		const prompt = `
 For your next message I want you to follow this strict instruction: 
@@ -546,30 +531,29 @@ Use the data available about ${moduleName} and provide me a few insights about i
 Data: ${newData}
 
 Only return the insights, do not return any other text.
-`
+`;
 		const response = await fetch("https://api.openai.com/v1/chat/completions", {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",
-				"Authorization": `Bearer ${API_KEY}`,
+				Authorization: `Bearer ${API_KEY}`,
 			},
 			body: JSON.stringify({
-				model: "gpt-4-turbo-preview", 
+				model: "gpt-4-turbo-preview",
 				messages: [
 					{
 						role: "user",
-						content: prompt
-					}
+						content: prompt,
+					},
 				],
 			}),
 		});
 
 		const data = await response.json();
 		const json = data.choices[0].message.content;
-		return json
+		return json;
 	} catch (err) {
 		console.log(err);
 		return null;
 	}
 }
-

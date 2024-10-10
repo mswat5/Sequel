@@ -1,3 +1,4 @@
+/*eslint-disable indent*/
 import classNames from "classnames";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import DocsIcon from "src/assets/module-icons/supplements.png";

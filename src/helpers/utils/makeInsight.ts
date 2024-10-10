@@ -1,10 +1,10 @@
-import { getInsightsAssestment } from "src/modules/whoop/LLMLogic";
+import { getInsightsData } from "src/modules/whoop/LLMLogic";
 import { handleStoreInsights } from "../storage";
 
 export const makeInsight = async (moduleName: string, data: string) => {
 	if (!data) return
 	try {
-		const result = await getInsightsAssestment(moduleName, data)
+		const result = await getInsightsData(moduleName, data)
 		if (!result) return
 		handleStoreInsights(result, moduleName)
 	} catch (e) {
