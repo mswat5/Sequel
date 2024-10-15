@@ -221,7 +221,7 @@ async function getOrCreateAssistant(openai: OpenAI): Promise<string> {
 			name: `Chat Assistant`,
 			instructions: assistantInstruction,
 			tools: [{ type: "code_interpreter" }],
-			model: "gpt-4-turbo-preview",
+			model: "gpt-3.5-turbo",
 		});
 		assistantId = assistant.id;
 		storeAssistantId(assistantId);
@@ -323,7 +323,7 @@ export async function getAnswer(
 		if (AIKey !== "") {
 			const model =
 				selectedAIConfiguration === "groqLlama"
-					? "llama2-70b-4096"
+					? "llama3-70b-8192"
 					: "mixtral-8x7b-32768";
 			const groq = new Groq({
 				apiKey: AIKey,
@@ -492,7 +492,7 @@ Return the filled in object below:
 				Authorization: `Bearer ${API_KEY}`,
 			},
 			body: JSON.stringify({
-				model: "gpt-4-turbo-preview",
+				model: "gpt-3.5-turbo",
 				messages: [
 					{
 						role: "user",
@@ -539,7 +539,7 @@ Only return the insights, do not return any other text.
 				Authorization: `Bearer ${API_KEY}`,
 			},
 			body: JSON.stringify({
-				model: "gpt-4-turbo-preview",
+				model: "gpt-3.5-turbo",
 				messages: [
 					{
 						role: "user",
